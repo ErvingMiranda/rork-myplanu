@@ -44,42 +44,42 @@ export async function guardarUsuarios(usuarios: any[]): Promise<void> {
           createdAt: String(u.createdAt || new Date().toISOString()),
         };
         
-        if (u.nombre && typeof u.nombre === 'string' && u.nombre.trim()) {
-          user.nombre = u.nombre.trim();
+        if (u.nombre && typeof u.nombre === 'string') {
+          const cleaned = u.nombre.trim().replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+          if (cleaned) user.nombre = cleaned;
         }
         
-        if (u.descripcion && typeof u.descripcion === 'string' && u.descripcion.trim()) {
-          user.descripcion = u.descripcion.trim();
+        if (u.descripcion && typeof u.descripcion === 'string') {
+          const cleaned = u.descripcion.trim().replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+          if (cleaned) user.descripcion = cleaned;
         }
         
-        if (u.fotoPerfil && typeof u.fotoPerfil === 'string' && u.fotoPerfil.trim()) {
-          user.fotoPerfil = u.fotoPerfil.trim();
+        if (u.fotoPerfil && typeof u.fotoPerfil === 'string') {
+          const cleaned = u.fotoPerfil.trim();
+          if (cleaned) user.fotoPerfil = cleaned;
         }
         
         return user;
       } catch (innerError) {
-        console.error(`❌ Error procesando usuario en índice ${index}:`, innerError);
-        console.error('Usuario problemático:', JSON.stringify(u, null, 2));
-        throw innerError;
+        console.error(`Error procesando usuario en indice ${index}`);
+        throw new Error('Error al procesar datos de usuario');
       }
     });
     
-    const serialized = JSON.stringify(cleaned, null, 0);
+    const serialized = JSON.stringify(cleaned);
     
     try {
       JSON.parse(serialized);
     } catch (parseError) {
-      console.error('❌ El JSON generado no es válido:', parseError);
-      console.error('Primeros 500 caracteres:', serialized.substring(0, 500));
-      throw new Error('El JSON generado no es válido');
+      console.error('Error: JSON no valido');
+      throw new Error('Error al validar datos');
     }
     
     await AsyncStorage.setItem(KEYS.USUARIOS, serialized);
     console.log('✅ Usuarios guardados correctamente');
   } catch (error: any) {
-    console.error('❌ Error al serializar usuarios:', error);
-    console.error('Error message:', error?.message);
-    throw new Error(`Error al guardar usuarios: ${error?.message || 'Desconocido'}`);
+    console.error('Error al guardar usuarios');
+    throw new Error('Error al guardar usuarios');
   }
 }
 
