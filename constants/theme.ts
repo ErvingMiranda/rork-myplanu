@@ -1,7 +1,7 @@
 export const COLORES_PRINCIPALES = {
-  primario: '#7C4DFF',
-  secundario: '#00E5FF',
-  acento: '#00E676',
+  primario: '#6200EA',
+  secundario: '#FF6B9D',
+  acento: '#00FFB3',
   fondo: '#FFFFFF',
   textoPrimario: '#000000',
   textoSecundario: '#4A4A4A',
@@ -9,9 +9,9 @@ export const COLORES_PRINCIPALES = {
 };
 
 export const GRADIENTES = {
-  principal: ['#00E5FF', '#7C4DFF'],
-  cabecera: ['#00E5FF', '#7C4DFF'],
-  boton: ['#7C4DFF', '#9C6BFF'],
+  principal: ['#FF6B9D', '#6200EA'],
+  cabecera: ['#FF6B9D', '#6200EA'],
+  boton: ['#6200EA', '#8E24FF'],
 };
 
 export const TIPOGRAFIA = {
@@ -89,9 +89,9 @@ export const BORDES = {
 
 export const TEMA_COMPLETO = {
   light: {
-    primary: '#7C4DFF',
-    secondary: '#00E5FF',
-    accent: '#00E676',
+    primary: '#6200EA',
+    secondary: '#FF6B9D',
+    accent: '#00FFB3',
     background: '#FFFFFF',
     surface: '#F9FAFB',
     card: '#FFFFFF',
@@ -99,36 +99,36 @@ export const TEMA_COMPLETO = {
     textSecondary: '#4A4A4A',
     border: '#DADADA',
     error: '#EF4444',
-    success: '#00E676',
+    success: '#00FFB3',
     warning: '#F59E0B',
     shadow: '#000000',
-    gradientStart: '#00E5FF',
-    gradientEnd: '#7C4DFF',
+    gradientStart: '#FF6B9D',
+    gradientEnd: '#6200EA',
   },
   dark: {
-    primary: '#9C6BFF',
-    secondary: '#33ECFF',
-    accent: '#33EF8A',
-    background: '#121212',
-    surface: '#1E1E1E',
+    primary: '#8E24FF',
+    secondary: '#FF8DB8',
+    accent: '#33FFCC',
+    background: '#001F3F',
+    surface: '#002952',
     card: '#2A2A2A',
     text: '#FFFFFF',
     textSecondary: '#A0A0A0',
     border: '#404040',
     error: '#F87171',
-    success: '#33EF8A',
+    success: '#33FFCC',
     warning: '#FBBF24',
     shadow: '#000000',
-    gradientStart: '#33ECFF',
-    gradientEnd: '#9C6BFF',
+    gradientStart: '#FF8DB8',
+    gradientEnd: '#8E24FF',
   },
 };
 
 export const COLORES_EVENTO = [
-  { id: 'violet', nombre: 'Violeta', valor: '#7C4DFF', light: '#E8DEFF' },
-  { id: 'cyan', nombre: 'Celeste', valor: '#00E5FF', light: '#CCFBFF' },
-  { id: 'green', nombre: 'Verde', valor: '#00E676', light: '#CCFFD9' },
-  { id: 'pink', nombre: 'Rosa', valor: '#F06292', light: '#FCE4EC' },
+  { id: 'violet', nombre: 'Violeta', valor: '#6200EA', light: '#E1BEE7' },
+  { id: 'pink', nombre: 'Rosa', valor: '#FF6B9D', light: '#FCE4EC' },
+  { id: 'cyan', nombre: 'Celeste', valor: '#00FFB3', light: '#B2FFF0' },
+  { id: 'navy', nombre: 'Azul Oscuro', valor: '#001F3F', light: '#B3D9FF' },
   { id: 'orange', nombre: 'Naranja', valor: '#FF9800', light: '#FFE0B2' },
   { id: 'blue', nombre: 'Azul', valor: '#2196F3', light: '#BBDEFB' },
   { id: 'red', nombre: 'Rojo', valor: '#F44336', light: '#FFCDD2' },
