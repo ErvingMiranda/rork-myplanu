@@ -17,7 +17,13 @@ export async function obtenerUsuarios(): Promise<any[]> {
 }
 
 export async function guardarUsuarios(usuarios: any[]): Promise<void> {
-  await AsyncStorage.setItem(KEYS.USUARIOS, JSON.stringify(usuarios));
+  try {
+    const serialized = JSON.stringify(usuarios);
+    await AsyncStorage.setItem(KEYS.USUARIOS, serialized);
+  } catch (error) {
+    console.error('Error al serializar usuarios:', error);
+    throw new Error('Error al guardar usuarios en AsyncStorage');
+  }
 }
 
 export async function obtenerEventos(): Promise<any[]> {

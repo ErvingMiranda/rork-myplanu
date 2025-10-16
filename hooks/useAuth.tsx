@@ -64,16 +64,21 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const actualizarUsuario = useCallback(async (datos: Partial<Usuario>) => {
     try {
       if (!usuario) throw new Error('No hay usuario autenticado');
+      
+      console.log('🔄 Actualizando usuario:', usuario.id, datos);
+      
       const { UsuarioRepository } = await import('@/data/repositories/usuarioRepository');
       const usuarioRepo = new UsuarioRepository();
       await usuarioRepo.actualizar(usuario.id, datos);
+      
       const usuarioActualizado = await usuarioRepo.obtenerPorId(usuario.id);
       if (usuarioActualizado) {
         setUsuario(usuarioActualizado);
+        console.log('✅ Usuario actualizado correctamente');
       }
-    } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('❌ Error al actualizar usuario:', error);
+      throw new Error(error?.message || 'Error al actualizar usuario');
     }
   }, [usuario]);
 
