@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTema } from '@/hooks/useTema';
 import { useAmigos } from '@/hooks/useAmigos';
 import { UserPlus, Check, X, Search, Users as UsersIcon, Trash2 } from 'lucide-react-native';
+import { GradientHeader } from '@/components/GradientHeader';
 import type { Usuario } from '@/types';
 
 export default function AmigosScreen() {
@@ -102,27 +103,15 @@ export default function AmigosScreen() {
     );
   };
 
-  const HEADER_HEIGHT = 140;
-  const HEADER_PADDING_TOP = insets.top + 16;
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colores.background,
+      backgroundColor: colores.surface,
     },
-    headerGradient: {
-      height: HEADER_HEIGHT,
-      paddingTop: HEADER_PADDING_TOP,
+    headerContent: {
       paddingHorizontal: 16,
+      paddingTop: 12,
       paddingBottom: 20,
-      backgroundColor: colores.gradientStart,
-    },
-    headerTitulo: {
-      fontSize: 22,
-      lineHeight: 26,
-      fontWeight: '700' as const,
-      color: '#FFFFFF',
-      marginBottom: 16,
     },
     tabsContainer: {
       flexDirection: 'row',
@@ -130,22 +119,25 @@ export default function AmigosScreen() {
     },
     tab: {
       flex: 1,
-      paddingVertical: 8,
+      paddingVertical: 10,
       paddingHorizontal: 12,
-      borderRadius: 8,
+      borderRadius: 12,
       alignItems: 'center',
-      backgroundColor: 'rgba(255,255,255,0.2)',
+      backgroundColor: colores.card,
+      borderWidth: 1,
+      borderColor: colores.border,
     },
     tabActiva: {
-      backgroundColor: '#FFFFFF',
+      backgroundColor: colores.primary,
+      borderColor: colores.primary,
     },
     tabTexto: {
       fontSize: 14,
       fontWeight: '600' as const,
-      color: '#FFFFFF',
+      color: colores.text,
     },
     tabTextoActiva: {
-      color: colores.gradientStart,
+      color: '#FFFFFF',
     },
     scrollContent: {
       paddingTop: 16,
@@ -356,8 +348,15 @@ export default function AmigosScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerGradient}>
-        <Text style={styles.headerTitulo}>Amigos</Text>
+      <GradientHeader
+        title="Amigos"
+        subtitle="Conecta con otros usuarios"
+        startColor={colores.gradientStart}
+        endColor={colores.gradientEnd}
+        height={180}
+        overlap={0}
+      />
+      <View style={styles.headerContent}>
         <View style={styles.tabsContainer}>
           <TouchableOpacity
             style={[styles.tab, tabActiva === 'amigos' && styles.tabActiva]}
