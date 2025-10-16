@@ -44,13 +44,15 @@ export const [EventosProvider, useEventos] = createContextHook(() => {
     if (!usuario) throw new Error('Usuario no autenticado');
 
     const nuevoEvento = await eventoRepo.crear(evento, usuario.id);
-    setEventos(prev => [...prev, nuevoEvento]);
     
     await notificacionService.programarRecordatorios(nuevoEvento);
     
     console.log('✅ Evento creado:', nuevoEvento.titulo);
+    
+    await cargarEventos();
+    
     return nuevoEvento;
-  }, [usuario]);
+  }, [usuario, cargarEventos]);
 
   const actualizar = useCallback(async (id: string, datos: Partial<EventoCrear>) => {
     await eventoRepo.actualizar(id, datos);

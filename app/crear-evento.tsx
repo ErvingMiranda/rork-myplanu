@@ -78,6 +78,11 @@ export default function CrearEventoScreen() {
       setShowDatePicker(false);
     }
     
+    if (event.type === 'dismissed') {
+      setShowDatePicker(false);
+      return;
+    }
+    
     if (selectedDate) {
       if (datePickerMode === 'start') {
         setFechaInicio(selectedDate);
@@ -92,6 +97,11 @@ export default function CrearEventoScreen() {
   const onTimeChange = (event: any, selectedTime?: Date) => {
     if (Platform.OS === 'android') {
       setShowTimePicker(false);
+    }
+    
+    if (event.type === 'dismissed') {
+      setShowTimePicker(false);
+      return;
     }
     
     if (selectedTime) {
@@ -679,20 +689,80 @@ export default function CrearEventoScreen() {
         </View>
       </ScrollView>
 
-      {showDatePicker && (
+      {showDatePicker && Platform.OS === 'ios' && (
+        <Modal
+          visible={showDatePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { maxHeight: 350 }]}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                  <Text style={[styles.modalOptionTexto, { color: colores.primary }]}>Cancelar</Text>
+                </TouchableOpacity>
+                <Text style={styles.modalTitulo}>Seleccionar fecha</Text>
+                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                  <Text style={[styles.modalOptionTexto, { color: colores.primary }]}>Listo</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={datePickerMode === 'start' ? fechaInicio : datePickerMode === 'end' ? fechaFin : fechaFinRecurrencia || new Date()}
+                mode="date"
+                display="spinner"
+                onChange={onDateChange}
+                style={{ backgroundColor: colores.card }}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+      
+      {showDatePicker && Platform.OS === 'android' && (
         <DateTimePicker
           value={datePickerMode === 'start' ? fechaInicio : datePickerMode === 'end' ? fechaFin : fechaFinRecurrencia || new Date()}
           mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display="default"
           onChange={onDateChange}
         />
       )}
 
-      {showTimePicker && (
+      {showTimePicker && Platform.OS === 'ios' && (
+        <Modal
+          visible={showTimePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowTimePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { maxHeight: 300 }]}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                  <Text style={[styles.modalOptionTexto, { color: colores.primary }]}>Cancelar</Text>
+                </TouchableOpacity>
+                <Text style={styles.modalTitulo}>Seleccionar hora</Text>
+                <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                  <Text style={[styles.modalOptionTexto, { color: colores.primary }]}>Listo</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={new Date()}
+                mode="time"
+                display="spinner"
+                onChange={onTimeChange}
+                style={{ backgroundColor: colores.card }}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+      
+      {showTimePicker && Platform.OS === 'android' && (
         <DateTimePicker
           value={new Date()}
           mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display="default"
           onChange={onTimeChange}
         />
       )}
