@@ -9,6 +9,20 @@ export interface Usuario {
   createdAt: string;
 }
 
+export interface ChecklistItem {
+  id: string;
+  texto: string;
+  completado: boolean;
+  createdAt: string;
+}
+
+export interface Recordatorio {
+  id: string;
+  tipo: 'minutos' | 'horas' | 'dias';
+  cantidad: number;
+  etiqueta: string;
+}
+
 export interface Evento {
   id: string;
   titulo: string;
@@ -21,11 +35,13 @@ export interface Evento {
   esRecurrente: boolean;
   diasSemana?: number[];
   fechaFinRecurrencia?: string;
-  recordatorios: number[];
+  recordatorios: Recordatorio[];
   notas?: string;
   userId: string;
   esCompartido: boolean;
   usuariosCompartidos?: string[];
+  checklist?: ChecklistItem[];
+  etiquetas?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -41,10 +57,12 @@ export interface EventoCrear {
   esRecurrente: boolean;
   diasSemana?: number[];
   fechaFinRecurrencia?: string;
-  recordatorios: number[];
+  recordatorios: Recordatorio[];
   notas?: string;
   esCompartido?: boolean;
   usuariosCompartidos?: string[];
+  checklist?: ChecklistItem[];
+  etiquetas?: string[];
 }
 
 export interface Ajustes {

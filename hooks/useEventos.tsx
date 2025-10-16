@@ -9,7 +9,6 @@ import {
   endOfWeek, 
   startOfMonth, 
   endOfMonth,
-  isSameDay,
   getDay,
 } from 'date-fns';
 
@@ -72,13 +71,25 @@ export const [EventosProvider, useEventos] = createContextHook(() => {
   const obtenerPorDia = useCallback((fecha: Date) => {
     return eventos.filter(evento => {
       const fechaEvento = new Date(evento.fechaInicio);
+      const fechaFinEvento = new Date(evento.fechaFin);
       
       if (evento.esRecurrente && evento.diasSemana) {
         const diaFecha = getDay(fecha);
-        return evento.diasSemana.includes(diaFecha);
+        if (!evento.diasSemana.includes(diaFecha)) return false;
+        
+        if (evento.fechaFinRecurrencia) {
+          const fechaFinRecurrencia = new Date(evento.fechaFinRecurrencia);
+          if (fecha > fechaFinRecurrencia) return false;
+        }
+        
+        return fecha >= fechaEvento;
       }
       
-      return isSameDay(fechaEvento, fecha);
+      const fechaSoloDia = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+      const eventoInicioDia = new Date(fechaEvento.getFullYear(), fechaEvento.getMonth(), fechaEvento.getDate());
+      const eventoFinDia = new Date(fechaFinEvento.getFullYear(), fechaFinEvento.getMonth(), fechaFinEvento.getDate());
+      
+      return fechaSoloDia >= eventoInicioDia && fechaSoloDia <= eventoFinDia;
     });
   }, [eventos]);
 

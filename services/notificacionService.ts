@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import type { Evento } from '@/types';
+import type { Evento, Recordatorio } from '@/types';
 
 let notificationsSupported = true;
 
@@ -39,6 +39,19 @@ export class NotificacionService {
     }
   }
 
+  private calcularMinutos(recordatorio: Recordatorio): number {
+    switch (recordatorio.tipo) {
+      case 'minutos':
+        return recordatorio.cantidad;
+      case 'horas':
+        return recordatorio.cantidad * 60;
+      case 'dias':
+        return recordatorio.cantidad * 24 * 60;
+      default:
+        return 0;
+    }
+  }
+
   async programarRecordatorios(evento: Evento): Promise<string[]> {
     if (Platform.OS === 'web' || !notificationsSupported) {
       return [];
@@ -47,7 +60,8 @@ export class NotificacionService {
     const identificadores: string[] = [];
     const fechaEvento = new Date(evento.fechaInicio);
 
-    for (const minutos of evento.recordatorios) {
+    for (const recordatorio of evento.recordatorios) {
+      const minutos = this.calcularMinutos(recordatorio);
       if (minutos === 0) continue;
 
       const fechaNotificacion = new Date(fechaEvento.getTime() - minutos * 60 * 1000);
@@ -62,7 +76,7 @@ export class NotificacionService {
         const id = await Notifications.scheduleNotificationAsync({
           content: {
             title: evento.titulo,
-            body: `${evento.curso || 'Evento'} ${minutos >= 60 ? `en ${Math.floor(minutos / 60)}h` : `en ${minutos}min`}`,
+            body: `${evento.curso || 'Evento'} - ${recordatorio.etiqueta}`,
             data: { eventoId: evento.id },
             sound: true,
           },
