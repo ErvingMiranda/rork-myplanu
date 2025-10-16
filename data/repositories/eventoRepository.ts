@@ -8,11 +8,25 @@ export class EventoRepository {
     const ahora = new Date().toISOString();
 
     const nuevoEvento: Evento = {
-      ...evento,
       id,
+      titulo: evento.titulo,
+      curso: evento.curso,
+      aula: evento.aula,
+      docente: evento.docente,
+      fechaInicio: evento.fechaInicio,
+      fechaFin: evento.fechaFin,
+      color: evento.color,
+      esRecurrente: evento.esRecurrente,
+      diasSemana: evento.diasSemana,
+      fechaFinRecurrencia: evento.fechaFinRecurrencia,
+      recordatorios: evento.recordatorios,
+      notas: evento.notas,
       userId,
       esCompartido: evento.esCompartido || false,
       usuariosCompartidos: evento.usuariosCompartidos || [],
+      checklist: evento.checklist,
+      etiquetas: evento.etiquetas,
+      esPublico: evento.esPublico || false,
       createdAt: ahora,
       updatedAt: ahora,
     };

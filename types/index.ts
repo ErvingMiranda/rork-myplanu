@@ -42,6 +42,7 @@ export interface Evento {
   usuariosCompartidos?: string[];
   checklist?: ChecklistItem[];
   etiquetas?: string[];
+  esPublico: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +64,7 @@ export interface EventoCrear {
   usuariosCompartidos?: string[];
   checklist?: ChecklistItem[];
   etiquetas?: string[];
+  esPublico?: boolean;
 }
 
 export interface Ajustes {

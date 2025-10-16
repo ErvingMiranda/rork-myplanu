@@ -44,10 +44,12 @@ export function useEventosAmigos() {
           finDia.toISOString()
         );
 
-        return eventosAmigo.map((evento): EventoAmigo => ({
-          ...evento,
-          propietario: usuario,
-        }));
+        return eventosAmigo
+          .filter(evento => evento.esPublico)
+          .map((evento): EventoAmigo => ({
+            ...evento,
+            propietario: usuario,
+          }));
       });
 
       const resultados = await Promise.all(promesasEventos);

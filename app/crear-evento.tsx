@@ -65,6 +65,7 @@ export default function CrearEventoScreen() {
   const [etiquetas, setEtiquetas] = useState<string[]>([]);
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState('');
   const [showEtiquetasModal, setShowEtiquetasModal] = useState(false);
+  const [esPublico, setEsPublico] = useState(false);
 
   useEffect(() => {
     const fechaFinTemp = new Date(fechaInicio);
@@ -206,6 +207,7 @@ export default function CrearEventoScreen() {
       checklist: checklist.length > 0 ? checklist : undefined,
       etiquetas: etiquetas.length > 0 ? etiquetas : undefined,
       esCompartido: false,
+      esPublico,
     };
 
     setCargando(true);
@@ -611,6 +613,27 @@ export default function CrearEventoScreen() {
           >
             <Plus size={18} color="#FFFFFF" />
             <Text style={styles.addButtonTexto}>Agregar tarea</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.seccion}>
+          <TouchableOpacity
+            style={styles.recurrenteContainer}
+            onPress={() => setEsPublico(!esPublico)}
+          >
+            <Text style={styles.recurrenteTexto}>Evento público (visible para amigos)</Text>
+            <View style={{ 
+              width: 24, 
+              height: 24, 
+              borderRadius: 12, 
+              backgroundColor: esPublico ? colores.primary : colores.border,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {esPublico && (
+                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#FFFFFF' }} />
+              )}
+            </View>
           </TouchableOpacity>
         </View>
 
