@@ -15,7 +15,17 @@ export async function obtenerUsuarios(): Promise<any[]> {
   try {
     const data = await AsyncStorage.getItem(KEYS.USUARIOS);
     if (!data) return [];
-    return JSON.parse(data);
+    
+    try {
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (parseError: any) {
+      console.error('❌ Error al parsear usuarios, datos corruptos:', parseError?.message);
+      console.error('Datos corruptos (primeros 200 caracteres):', data.substring(0, 200));
+      await AsyncStorage.removeItem(KEYS.USUARIOS);
+      console.log('🧹 Datos corruptos eliminados, comenzando con base limpia');
+      return [];
+    }
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
     return [];
@@ -24,34 +34,40 @@ export async function obtenerUsuarios(): Promise<any[]> {
 
 export async function guardarUsuarios(usuarios: any[]): Promise<void> {
   try {
-    const cleaned = usuarios.map(u => {
-      const user: any = {
-        id: u.id,
-        email: u.email,
-        pin: u.pin,
-        nombre: u.nombre,
-        eventosPublicos: u.eventosPublicos ?? false,
-        createdAt: u.createdAt,
-      };
-      
-      if (u.descripcion) {
-        user.descripcion = u.descripcion;
+    const cleaned = usuarios.map((u, index) => {
+      try {
+        const user: any = {
+          id: u.id,
+          email: u.email,
+          pin: u.pin,
+          nombre: u.nombre || undefined,
+          eventosPublicos: u.eventosPublicos ?? false,
+          createdAt: u.createdAt,
+        };
+        
+        if (u.descripcion && typeof u.descripcion === 'string') {
+          user.descripcion = u.descripcion;
+        }
+        
+        if (u.fotoPerfil && typeof u.fotoPerfil === 'string') {
+          user.fotoPerfil = u.fotoPerfil;
+        }
+        
+        return user;
+      } catch (innerError) {
+        console.error(`❌ Error procesando usuario en índice ${index}:`, innerError);
+        console.error('Usuario problemático:', u);
+        throw innerError;
       }
-      
-      if (u.fotoPerfil && typeof u.fotoPerfil === 'string') {
-        user.fotoPerfil = u.fotoPerfil;
-      }
-      
-      return user;
     });
     
     const serialized = JSON.stringify(cleaned);
     await AsyncStorage.setItem(KEYS.USUARIOS, serialized);
     console.log('✅ Usuarios guardados correctamente');
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error al serializar usuarios:', error);
-    console.error('Datos que causaron el error:', JSON.stringify(usuarios, null, 2).substring(0, 500));
-    throw new Error('Error al guardar usuarios en AsyncStorage');
+    console.error('Error message:', error?.message);
+    throw new Error(`Error al guardar usuarios: ${error?.message || 'Desconocido'}`);
   }
 }
 
