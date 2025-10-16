@@ -459,22 +459,22 @@ export default function CrearEventoScreen() {
           />
 
           <Input
-            label="Curso"
-            placeholder="Ej: MAT101"
+            label="Tipo de evento"
+            placeholder="Ej: Clase, Reunión, Taller"
             value={curso}
             onChangeText={setCurso}
           />
 
           <Input
-            label="Aula"
-            placeholder="Ej: Aula 305"
+            label="Lugar"
+            placeholder="Ej: Aula 305, Biblioteca"
             value={aula}
             onChangeText={setAula}
           />
 
           <Input
-            label="Docente"
-            placeholder="Ej: Dr. García"
+            label="Organizador"
+            placeholder="Ej: Dr. García, Club de Debate"
             value={docente}
             onChangeText={setDocente}
           />

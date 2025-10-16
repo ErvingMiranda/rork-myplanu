@@ -213,7 +213,7 @@ export default function DetalleEventoScreen() {
           {evento.curso && (
             <View style={styles.infoRow}>
               <Calendar size={20} color={colores.primary} />
-              <Text style={styles.infoLabel}>Curso:</Text>
+              <Text style={styles.infoLabel}>Tipo:</Text>
               <Text style={styles.infoValor}>{evento.curso}</Text>
             </View>
           )}
@@ -221,7 +221,7 @@ export default function DetalleEventoScreen() {
           {evento.aula && (
             <View style={styles.infoRow}>
               <MapPin size={20} color={colores.primary} />
-              <Text style={styles.infoLabel}>Aula:</Text>
+              <Text style={styles.infoLabel}>Lugar:</Text>
               <Text style={styles.infoValor}>{evento.aula}</Text>
             </View>
           )}
@@ -229,7 +229,7 @@ export default function DetalleEventoScreen() {
           {evento.docente && (
             <View style={styles.infoRow}>
               <User size={20} color={colores.primary} />
-              <Text style={styles.infoLabel}>Docente:</Text>
+              <Text style={styles.infoLabel}>Organizador:</Text>
               <Text style={styles.infoValor}>{evento.docente}</Text>
             </View>
           )}
