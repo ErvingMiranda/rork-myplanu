@@ -12,13 +12,29 @@ export async function inicializarDB(): Promise<void> {
 }
 
 export async function obtenerUsuarios(): Promise<any[]> {
-  const data = await AsyncStorage.getItem(KEYS.USUARIOS);
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = await AsyncStorage.getItem(KEYS.USUARIOS);
+    if (!data) return [];
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    return [];
+  }
 }
 
 export async function guardarUsuarios(usuarios: any[]): Promise<void> {
   try {
-    const serialized = JSON.stringify(usuarios);
+    const cleaned = usuarios.map(u => ({
+      id: u.id,
+      email: u.email,
+      pin: u.pin,
+      nombre: u.nombre,
+      descripcion: u.descripcion,
+      fotoPerfil: u.fotoPerfil,
+      eventosPublicos: u.eventosPublicos ?? false,
+      createdAt: u.createdAt,
+    }));
+    const serialized = JSON.stringify(cleaned);
     await AsyncStorage.setItem(KEYS.USUARIOS, serialized);
   } catch (error) {
     console.error('Error al serializar usuarios:', error);
