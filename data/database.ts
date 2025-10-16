@@ -37,31 +37,43 @@ export async function guardarUsuarios(usuarios: any[]): Promise<void> {
     const cleaned = usuarios.map((u, index) => {
       try {
         const user: any = {
-          id: u.id,
-          email: u.email,
-          pin: u.pin,
-          nombre: u.nombre || undefined,
-          eventosPublicos: u.eventosPublicos ?? false,
-          createdAt: u.createdAt,
+          id: String(u.id || ''),
+          email: String(u.email || ''),
+          pin: String(u.pin || ''),
+          eventosPublicos: Boolean(u.eventosPublicos),
+          createdAt: String(u.createdAt || new Date().toISOString()),
         };
         
-        if (u.descripcion && typeof u.descripcion === 'string') {
-          user.descripcion = u.descripcion;
+        if (u.nombre && typeof u.nombre === 'string' && u.nombre.trim()) {
+          user.nombre = u.nombre.trim();
         }
         
-        if (u.fotoPerfil && typeof u.fotoPerfil === 'string') {
-          user.fotoPerfil = u.fotoPerfil;
+        if (u.descripcion && typeof u.descripcion === 'string' && u.descripcion.trim()) {
+          user.descripcion = u.descripcion.trim();
+        }
+        
+        if (u.fotoPerfil && typeof u.fotoPerfil === 'string' && u.fotoPerfil.trim()) {
+          user.fotoPerfil = u.fotoPerfil.trim();
         }
         
         return user;
       } catch (innerError) {
         console.error(`❌ Error procesando usuario en índice ${index}:`, innerError);
-        console.error('Usuario problemático:', u);
+        console.error('Usuario problemático:', JSON.stringify(u, null, 2));
         throw innerError;
       }
     });
     
-    const serialized = JSON.stringify(cleaned);
+    const serialized = JSON.stringify(cleaned, null, 0);
+    
+    try {
+      JSON.parse(serialized);
+    } catch (parseError) {
+      console.error('❌ El JSON generado no es válido:', parseError);
+      console.error('Primeros 500 caracteres:', serialized.substring(0, 500));
+      throw new Error('El JSON generado no es válido');
+    }
+    
     await AsyncStorage.setItem(KEYS.USUARIOS, serialized);
     console.log('✅ Usuarios guardados correctamente');
   } catch (error: any) {
