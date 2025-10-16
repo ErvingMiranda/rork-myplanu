@@ -13,7 +13,7 @@ import { GradientHeader, useGradientHeaderOverlap } from '@/components/GradientH
 export default function AjustesScreen() {
   const router = useRouter();
   const { colores, ajustes, actualizarAjustes, isDark } = useTema();
-  const { usuario, cerrarSesion } = useAuth();
+  const { usuario, cerrarSesion, actualizarUsuario } = useAuth();
   const { solicitudesPendientes } = useAmigos();
   const PROFILE_OVERLAP = 12;
   const overlapStyle = useGradientHeaderOverlap(PROFILE_OVERLAP);
@@ -48,9 +48,7 @@ export default function AjustesScreen() {
 
   const toggleEventosPublicos = async (value: boolean) => {
     try {
-      const { UsuarioRepository } = await import('@/data/repositories/usuarioRepository');
-      const usuarioRepo = new UsuarioRepository();
-      await usuarioRepo.actualizar(usuario?.id || '', { eventosPublicos: value });
+      await actualizarUsuario({ eventosPublicos: value });
       Alert.alert(
         'Éxito',
         value 
