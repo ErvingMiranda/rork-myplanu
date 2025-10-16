@@ -24,20 +24,33 @@ export async function obtenerUsuarios(): Promise<any[]> {
 
 export async function guardarUsuarios(usuarios: any[]): Promise<void> {
   try {
-    const cleaned = usuarios.map(u => ({
-      id: u.id,
-      email: u.email,
-      pin: u.pin,
-      nombre: u.nombre,
-      descripcion: u.descripcion,
-      fotoPerfil: u.fotoPerfil,
-      eventosPublicos: u.eventosPublicos ?? false,
-      createdAt: u.createdAt,
-    }));
+    const cleaned = usuarios.map(u => {
+      const user: any = {
+        id: u.id,
+        email: u.email,
+        pin: u.pin,
+        nombre: u.nombre,
+        eventosPublicos: u.eventosPublicos ?? false,
+        createdAt: u.createdAt,
+      };
+      
+      if (u.descripcion) {
+        user.descripcion = u.descripcion;
+      }
+      
+      if (u.fotoPerfil && typeof u.fotoPerfil === 'string') {
+        user.fotoPerfil = u.fotoPerfil;
+      }
+      
+      return user;
+    });
+    
     const serialized = JSON.stringify(cleaned);
     await AsyncStorage.setItem(KEYS.USUARIOS, serialized);
+    console.log('✅ Usuarios guardados correctamente');
   } catch (error) {
-    console.error('Error al serializar usuarios:', error);
+    console.error('❌ Error al serializar usuarios:', error);
+    console.error('Datos que causaron el error:', JSON.stringify(usuarios, null, 2).substring(0, 500));
     throw new Error('Error al guardar usuarios en AsyncStorage');
   }
 }
