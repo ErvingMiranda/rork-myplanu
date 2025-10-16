@@ -11,6 +11,8 @@ export class EventoRepository {
       ...evento,
       id,
       userId,
+      esCompartido: evento.esCompartido || false,
+      usuariosCompartidos: evento.usuariosCompartidos || [],
       createdAt: ahora,
       updatedAt: ahora,
     };

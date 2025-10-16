@@ -192,6 +192,11 @@ export default function DetalleEventoScreen() {
 
         <View style={styles.buttonsContainer}>
           <Button
+            title="Compartir con amigos"
+            onPress={() => router.push(`/compartir-evento?eventoId=${evento.id}`)}
+            variant="gradient"
+          />
+          <Button
             title="Eliminar Evento"
             onPress={handleEliminar}
             variant="outline"

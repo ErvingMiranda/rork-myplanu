@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { Plus, Clock, User } from 'lucide-react-native';
+import { Plus, Clock, User, Users as UsersIcon } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { BORDES, SOMBRAS } from '@/constants/theme';
 import { useTema } from '@/hooks/useTema';
 import { useEventos } from '@/hooks/useEventos';
+import { useEventosAmigos } from '@/hooks/useEventosAmigos';
 import { Card } from '@/components/Card';
 import { GradientHeader, useGradientHeaderOverlap } from '@/components/GradientHeader';
 import { format } from 'date-fns';
@@ -16,6 +17,8 @@ export default function HoyScreen() {
   const { obtenerEventosHoy } = useEventos();
   const { usuario } = useAuth();
   const router = useRouter();
+  const { eventosAmigos } = useEventosAmigos();
+  const [mostrarEventosAmigos, setMostrarEventosAmigos] = useState(false);
   const TODAY_OVERLAP = 0;
   const overlapStyle = useGradientHeaderOverlap(TODAY_OVERLAP);
 
@@ -140,6 +143,67 @@ export default function HoyScreen() {
       justifyContent: 'center',
       ...SOMBRAS.fuerte,
     },
+    toggleContainer: {
+      flexDirection: 'row',
+      gap: 8,
+      paddingHorizontal: 16,
+      marginBottom: 16,
+    },
+    toggleButton: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colores.border,
+      backgroundColor: colores.card,
+      alignItems: 'center',
+    },
+    toggleButtonActivo: {
+      backgroundColor: colores.primary,
+      borderColor: colores.primary,
+    },
+    toggleTexto: {
+      fontSize: 14,
+      fontWeight: '600' as const,
+      color: colores.text,
+    },
+    toggleTextoActivo: {
+      color: '#FFFFFF',
+    },
+    eventoAmigoCard: {
+      marginBottom: 12,
+      padding: 16,
+      borderLeftWidth: 4,
+      backgroundColor: `${colores.primary}08`,
+    },
+    amigoInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 8,
+      paddingTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: colores.border,
+    },
+    amigoAvatar: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: colores.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    amigoAvatarTexto: {
+      fontSize: 12,
+      fontWeight: '700' as const,
+      color: '#FFFFFF',
+    },
+    amigoNombre: {
+      fontSize: 13,
+      fontWeight: '600' as const,
+      color: colores.textSecondary,
+    },
   });
 
   return (
@@ -190,8 +254,28 @@ export default function HoyScreen() {
           </Text>
         </View>
 
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity
+            style={[styles.toggleButton, !mostrarEventosAmigos && styles.toggleButtonActivo]}
+            onPress={() => setMostrarEventosAmigos(false)}
+          >
+            <Text style={[styles.toggleTexto, !mostrarEventosAmigos && styles.toggleTextoActivo]}>
+              Mis eventos
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, mostrarEventosAmigos && styles.toggleButtonActivo]}
+            onPress={() => setMostrarEventosAmigos(true)}
+          >
+            <Text style={[styles.toggleTexto, mostrarEventosAmigos && styles.toggleTextoActivo]}>
+              Eventos de amigos ({eventosAmigos.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {eventosHoy.length === 0 ? (
+          {!mostrarEventosAmigos ? (
+            eventosHoy.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
                 No tienes eventos para hoy.{'\n'}¡Disfruta tu día libre!
@@ -245,6 +329,53 @@ export default function HoyScreen() {
                 </View>
               )}
             </>
+          )
+          ) : (
+            eventosAmigos.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <UsersIcon size={48} color={colores.textSecondary} />
+                <Text style={styles.emptyText}>
+                  Tus amigos no tienen eventos públicos hoy.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.seccion}>
+                <Text style={styles.seccionTitulo}>Eventos de amigos</Text>
+                {eventosAmigos.map((evento) => {
+                  const inicial = evento.propietario.nombre 
+                    ? evento.propietario.nombre[0].toUpperCase()
+                    : evento.propietario.email[0].toUpperCase();
+                  
+                  return (
+                    <Card 
+                      key={evento.id} 
+                      style={[styles.eventoAmigoCard, { borderLeftColor: evento.color }]}
+                    >
+                      <View style={styles.eventoHeader}>
+                        <Text style={styles.eventoTitulo}>{evento.titulo}</Text>
+                        <Text style={styles.eventoHora}>
+                          {format(new Date(evento.fechaInicio), 'HH:mm')}
+                        </Text>
+                      </View>
+                      {evento.curso && (
+                        <View style={styles.eventoInfo}>
+                          <Clock size={14} color={colores.textSecondary} />
+                          <Text style={styles.eventoInfoTexto}>{evento.curso}</Text>
+                        </View>
+                      )}
+                      <View style={styles.amigoInfo}>
+                        <View style={styles.amigoAvatar}>
+                          <Text style={styles.amigoAvatarTexto}>{inicial}</Text>
+                        </View>
+                        <Text style={styles.amigoNombre}>
+                          {evento.propietario.nombre || evento.propietario.email}
+                        </Text>
+                      </View>
+                    </Card>
+                  );
+                })}
+              </View>
+            )
           )}
         </ScrollView>
 

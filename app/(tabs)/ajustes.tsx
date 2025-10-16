@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { Sun, Moon, Bell, Info, User, ChevronRight } from 'lucide-react-native';
+import { Sun, Moon, Bell, Info, User, ChevronRight, Users as UsersIcon, BellDot } from 'lucide-react-native';
 import { BORDES, SOMBRAS } from '@/constants/theme';
 import { useTema } from '@/hooks/useTema';
 import { useAuth } from '@/hooks/useAuth';
+import { useAmigos } from '@/hooks/useAmigos';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { GradientHeader, useGradientHeaderOverlap } from '@/components/GradientHeader';
@@ -13,6 +14,7 @@ export default function AjustesScreen() {
   const router = useRouter();
   const { colores, ajustes, actualizarAjustes, isDark } = useTema();
   const { usuario, cerrarSesion } = useAuth();
+  const { solicitudesPendientes } = useAmigos();
   const PROFILE_OVERLAP = 12;
   const overlapStyle = useGradientHeaderOverlap(PROFILE_OVERLAP);
 
@@ -42,6 +44,22 @@ export default function AjustesScreen() {
 
   const toggleVibracion = (value: boolean) => {
     actualizarAjustes({ vibracionHabilitada: value });
+  };
+
+  const toggleEventosPublicos = async (value: boolean) => {
+    try {
+      const { UsuarioRepository } = await import('@/data/repositories/usuarioRepository');
+      const usuarioRepo = new UsuarioRepository();
+      await usuarioRepo.actualizar(usuario?.id || '', { eventosPublicos: value });
+      Alert.alert(
+        'Éxito',
+        value 
+          ? 'Tus amigos ahora pueden ver tus eventos de hoy'
+          : 'Tus eventos ahora son privados'
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Error al actualizar configuración');
+    }
   };
 
   const styles = StyleSheet.create({
@@ -273,6 +291,55 @@ export default function AjustesScreen() {
                 <Switch
                   value={ajustes.vibracionHabilitada}
                   onValueChange={toggleVibracion}
+                  trackColor={{ false: colores.border, true: colores.primary }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+            </Card>
+          </View>
+
+          <View style={styles.seccion}>
+            <Text style={styles.seccionTitulo}>Social</Text>
+            
+            <Card style={styles.opcionCard}>
+              <TouchableOpacity 
+                onPress={() => router.push('/notificaciones' as any)}
+                style={styles.opcion}
+              >
+                <View style={styles.opcionLeft}>
+                  <BellDot size={24} color={colores.primary} />
+                  <View style={styles.opcionTextos}>
+                    <Text style={styles.opcionTitulo}>Notificaciones</Text>
+                    <Text style={styles.opcionDescripcion}>
+                      {solicitudesPendientes.length > 0 
+                        ? `${solicitudesPendientes.length} solicitud${solicitudesPendientes.length > 1 ? 'es' : ''} pendiente${solicitudesPendientes.length > 1 ? 's' : ''}`
+                        : 'Sin notificaciones nuevas'
+                      }
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight size={20} color={colores.textSecondary} />
+              </TouchableOpacity>
+            </Card>
+          </View>
+
+          <View style={styles.seccion}>
+            <Text style={styles.seccionTitulo}>Privacidad</Text>
+            
+            <Card style={styles.opcionCard}>
+              <View style={styles.opcion}>
+                <View style={styles.opcionLeft}>
+                  <UsersIcon size={24} color={colores.primary} />
+                  <View style={styles.opcionTextos}>
+                    <Text style={styles.opcionTitulo}>Eventos públicos</Text>
+                    <Text style={styles.opcionDescripcion}>
+                      Permitir que tus amigos vean tus eventos
+                    </Text>
+                  </View>
+                </View>
+                <Switch
+                  value={usuario?.eventosPublicos || false}
+                  onValueChange={toggleEventosPublicos}
                   trackColor={{ false: colores.border, true: colores.primary }}
                   thumbColor="#FFFFFF"
                 />

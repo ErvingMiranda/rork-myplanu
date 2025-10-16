@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,13 +25,23 @@ export default function CrearEventoScreen() {
   const [curso, setCurso] = useState('');
   const [aula, setAula] = useState('');
   const [docente, setDocente] = useState('');
-  const [fecha] = useState(new Date());
+  const [fechaInicio, setFechaInicio] = useState(new Date());
+  const [fechaFin, setFechaFin] = useState(new Date());
   const [horaInicio, setHoraInicio] = useState('09:00');
   const [horaFin, setHoraFin] = useState('10:00');
+  const [fechaFinRecurrencia, setFechaFinRecurrencia] = useState<Date | null>(null);
+  const [mostrarFechaFinRecurrencia, setMostrarFechaFinRecurrencia] = useState(false);
   const [colorSeleccionado, setColorSeleccionado] = useState(COLORES_EVENTO[0]);
   const [esRecurrente, setEsRecurrente] = useState(false);
   const [diasSeleccionados, setDiasSeleccionados] = useState<number[]>([]);
   const [cargando, setCargando] = useState(false);
+
+  useEffect(() => {
+    const fechaFinTemp = new Date(fechaInicio);
+    const [horaF, minF] = horaFin.split(':').map(Number);
+    fechaFinTemp.setHours(horaF, minF, 0, 0);
+    setFechaFin(fechaFinTemp);
+  }, [fechaInicio, horaFin]);
 
   const handleGuardar = async () => {
     if (!titulo.trim()) {
@@ -42,14 +52,19 @@ export default function CrearEventoScreen() {
     const [horaI, minI] = horaInicio.split(':').map(Number);
     const [horaF, minF] = horaFin.split(':').map(Number);
 
-    const fechaInicio = new Date(fecha);
-    fechaInicio.setHours(horaI, minI, 0, 0);
+    const fechaInicioFinal = new Date(fechaInicio);
+    fechaInicioFinal.setHours(horaI, minI, 0, 0);
 
-    const fechaFin = new Date(fecha);
-    fechaFin.setHours(horaF, minF, 0, 0);
+    const fechaFinFinal = new Date(fechaFin);
+    fechaFinFinal.setHours(horaF, minF, 0, 0);
 
-    if (fechaFin <= fechaInicio) {
-      Alert.alert('Error', 'La hora de fin debe ser posterior a la hora de inicio');
+    if (fechaFinFinal <= fechaInicioFinal) {
+      Alert.alert('Error', 'La fecha/hora de fin debe ser posterior a la de inicio');
+      return;
+    }
+
+    if (esRecurrente && !fechaFinRecurrencia) {
+      Alert.alert('Error', 'Debes especificar hasta cuándo se repetirá el evento');
       return;
     }
 
@@ -58,12 +73,14 @@ export default function CrearEventoScreen() {
       curso: curso.trim() || undefined,
       aula: aula.trim() || undefined,
       docente: docente.trim() || undefined,
-      fechaInicio: fechaInicio.toISOString(),
-      fechaFin: fechaFin.toISOString(),
+      fechaInicio: fechaInicioFinal.toISOString(),
+      fechaFin: fechaFinFinal.toISOString(),
       color: colorSeleccionado.valor,
       esRecurrente,
       diasSemana: esRecurrente && diasSeleccionados.length > 0 ? diasSeleccionados : undefined,
+      fechaFinRecurrencia: fechaFinRecurrencia?.toISOString(),
       recordatorios: [15],
+      esCompartido: false,
     };
 
     setCargando(true);
@@ -169,6 +186,19 @@ export default function CrearEventoScreen() {
       marginTop: 8,
       paddingBottom: Platform.OS === 'ios' ? 32 : 16,
     },
+    fechaButton: {
+      padding: 16,
+      backgroundColor: colores.card,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colores.border,
+      marginTop: 4,
+    },
+    fechaTexto: {
+      fontSize: 16,
+      fontWeight: '600' as const,
+      color: colores.text,
+    },
   });
 
   return (
@@ -205,7 +235,31 @@ export default function CrearEventoScreen() {
         </View>
 
         <View style={styles.seccion}>
-          <Text style={styles.seccionTitulo}>Horario</Text>
+          <Text style={styles.seccionTitulo}>Fechas</Text>
+          
+          <View style={{ marginBottom: 16 }}>
+            <Text style={[styles.seccionTitulo, { fontSize: 14, marginBottom: 8 }]}>Fecha inicio</Text>
+            <TouchableOpacity 
+              style={styles.fechaButton}
+              onPress={() => {
+                Alert.alert('Info', 'Selector de fecha próximamente. Por ahora usa la fecha actual.');
+              }}
+            >
+              <Text style={styles.fechaTexto}>{fechaInicio.toLocaleDateString('es-ES')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ marginBottom: 16 }}>
+            <Text style={[styles.seccionTitulo, { fontSize: 14, marginBottom: 8 }]}>Fecha fin (si dura varios días)</Text>
+            <TouchableOpacity 
+              style={styles.fechaButton}
+              onPress={() => {
+                Alert.alert('Info', 'Selector de fecha próximamente.');
+              }}
+            >
+              <Text style={styles.fechaTexto}>{fechaFin.toLocaleDateString('es-ES')}</Text>
+            </TouchableOpacity>
+          </View>
           
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
             <Input
@@ -284,6 +338,42 @@ export default function CrearEventoScreen() {
                     </Text>
                   </TouchableOpacity>
                 ))}
+              </View>
+
+              <View style={{ marginTop: 16 }}>
+                <TouchableOpacity
+                  style={styles.recurrenteContainer}
+                  onPress={() => setMostrarFechaFinRecurrencia(!mostrarFechaFinRecurrencia)}
+                >
+                  <Text style={styles.recurrenteTexto}>Hasta cuándo repetir *</Text>
+                  <View style={{ 
+                    width: 24, 
+                    height: 24, 
+                    borderRadius: 12, 
+                    backgroundColor: mostrarFechaFinRecurrencia ? colores.primary : colores.border,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    {mostrarFechaFinRecurrencia && (
+                      <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#FFFFFF' }} />
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {mostrarFechaFinRecurrencia && (
+                  <TouchableOpacity 
+                    style={styles.fechaButton}
+                    onPress={() => {
+                      const fechaTemp = new Date();
+                      fechaTemp.setMonth(fechaTemp.getMonth() + 3);
+                      setFechaFinRecurrencia(fechaTemp);
+                    }}
+                  >
+                    <Text style={styles.fechaTexto}>
+                      {fechaFinRecurrencia ? fechaFinRecurrencia.toLocaleDateString('es-ES') : 'Seleccionar fecha'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </>
           )}

@@ -1,13 +1,24 @@
 import { obtenerUsuarios, guardarUsuarios } from '../database';
 import type { Usuario } from '@/types';
 
+export interface BuscarUsuarioParams {
+  email?: string;
+  nombre?: string;
+  excluirId?: string;
+}
+
 export class UsuarioRepository {
   async crear(usuario: Omit<Usuario, 'id' | 'createdAt'>): Promise<Usuario> {
     const usuarios = await obtenerUsuarios();
     const id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const createdAt = new Date().toISOString();
 
-    const nuevoUsuario: Usuario = { ...usuario, id, createdAt };
+    const nuevoUsuario: Usuario = { 
+      ...usuario, 
+      id, 
+      createdAt,
+      eventosPublicos: usuario.eventosPublicos ?? false,
+    };
     usuarios.push(nuevoUsuario);
     await guardarUsuarios(usuarios);
 
@@ -53,5 +64,19 @@ export class UsuarioRepository {
 
     usuarios[index] = { ...usuarios[index], ...datos };
     await guardarUsuarios(usuarios);
+  }
+
+  async buscar(params: BuscarUsuarioParams): Promise<Usuario[]> {
+    const usuarios = await obtenerUsuarios();
+    return usuarios.filter((u: Usuario) => {
+      if (params.excluirId && u.id === params.excluirId) return false;
+      if (params.email && !u.email.toLowerCase().includes(params.email.toLowerCase())) return false;
+      if (params.nombre && u.nombre && !u.nombre.toLowerCase().includes(params.nombre.toLowerCase())) return false;
+      return true;
+    });
+  }
+
+  async obtenerTodos(): Promise<Usuario[]> {
+    return await obtenerUsuarios();
   }
 }

@@ -5,6 +5,7 @@ export interface Usuario {
   nombre?: string;
   fotoPerfil?: string;
   descripcion?: string;
+  eventosPublicos: boolean;
   createdAt: string;
 }
 
@@ -19,9 +20,12 @@ export interface Evento {
   color: string;
   esRecurrente: boolean;
   diasSemana?: number[];
+  fechaFinRecurrencia?: string;
   recordatorios: number[];
   notas?: string;
   userId: string;
+  esCompartido: boolean;
+  usuariosCompartidos?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -36,8 +40,11 @@ export interface EventoCrear {
   color: string;
   esRecurrente: boolean;
   diasSemana?: number[];
+  fechaFinRecurrencia?: string;
   recordatorios: number[];
   notas?: string;
+  esCompartido?: boolean;
+  usuariosCompartidos?: string[];
 }
 
 export interface Ajustes {
@@ -49,3 +56,23 @@ export interface Ajustes {
 }
 
 export type VistaCalendario = 'dia' | 'semana' | 'mes';
+
+export interface Amistad {
+  id: string;
+  usuarioId: string;
+  amigoId: string;
+  estado: 'pendiente' | 'aceptada' | 'rechazada';
+  solicitadoPor: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SolicitudEvento {
+  id: string;
+  eventoId: string;
+  remitenteId: string;
+  destinatarioId: string;
+  estado: 'pendiente' | 'aceptada' | 'rechazada';
+  createdAt: string;
+  updatedAt: string;
+}
