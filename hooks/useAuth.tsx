@@ -61,6 +61,18 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, [router]);
 
+  const eliminarCuenta = useCallback(async () => {
+    try {
+      if (!usuario) throw new Error('No hay usuario autenticado');
+      await authService.cerrarSesion();
+      setUsuario(null);
+      router.replace('/onboarding' as any);
+    } catch (error) {
+      console.error('Error al eliminar cuenta:', error);
+      throw error;
+    }
+  }, [usuario, router]);
+
   return useMemo(() => ({
     usuario,
     cargando,
@@ -69,5 +81,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     registrar,
     iniciarSesion,
     cerrarSesion,
-  }), [usuario, cargando, inicializado, registrar, iniciarSesion, cerrarSesion]);
+    eliminarCuenta,
+  }), [usuario, cargando, inicializado, registrar, iniciarSesion, cerrarSesion, eliminarCuenta]);
 });

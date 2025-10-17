@@ -79,4 +79,16 @@ export class UsuarioRepository {
   async obtenerTodos(): Promise<Usuario[]> {
     return await obtenerUsuarios();
   }
+
+  async eliminar(id: string): Promise<void> {
+    const usuarios = await obtenerUsuarios();
+    const index = usuarios.findIndex((u: Usuario) => u.id === id);
+    
+    if (index === -1) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    usuarios.splice(index, 1);
+    await guardarUsuarios(usuarios);
+  }
 }

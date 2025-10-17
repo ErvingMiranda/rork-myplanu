@@ -96,4 +96,14 @@ export class AmistadRepository {
       a.estado === 'aceptada'
     );
   }
+
+  async obtenerTodas(): Promise<Amistad[]> {
+    return await obtenerAmistades();
+  }
+
+  async eliminar(amistadId: string): Promise<void> {
+    const amistades = await obtenerAmistades();
+    const filtradas = amistades.filter((a: Amistad) => a.id !== amistadId);
+    await guardarAmistades(filtradas);
+  }
 }

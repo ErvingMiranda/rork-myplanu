@@ -5,6 +5,7 @@ import { Sun, Moon, Bell, Info, User, ChevronRight, Users as UsersIcon, BellDot 
 import { BORDES, SOMBRAS } from '@/constants/theme';
 import { useTema } from '@/hooks/useTema';
 import { useAuth } from '@/hooks/useAuth';
+import { trpc } from '@/lib/trpc';
 import { useAmigos } from '@/hooks/useAmigos';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -13,8 +14,9 @@ import { GradientHeader, useGradientHeaderOverlap } from '@/components/GradientH
 export default function AjustesScreen() {
   const router = useRouter();
   const { colores, ajustes, actualizarAjustes, isDark } = useTema();
-  const { usuario, cerrarSesion } = useAuth();
+  const { usuario, cerrarSesion, eliminarCuenta } = useAuth();
   const { solicitudesPendientes } = useAmigos();
+  const eliminarUsuarioMutation = trpc.usuarios.eliminar.useMutation();
   const PROFILE_OVERLAP = 12;
   const overlapStyle = useGradientHeaderOverlap(PROFILE_OVERLAP);
 
@@ -28,6 +30,29 @@ export default function AjustesScreen() {
           text: 'Cerrar Sesión', 
           style: 'destructive',
           onPress: cerrarSesion 
+        },
+      ]
+    );
+  };
+
+  const handleEliminarCuenta = () => {
+    Alert.alert(
+      'Eliminar Cuenta',
+      '¿Estás seguro? Esta acción eliminará permanentemente tu cuenta y todos tus datos, incluyendo eventos, amistades y solicitudes. Esta acción no se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Eliminar', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await eliminarUsuarioMutation.mutateAsync({ usuarioId: usuario?.id || '' });
+              await eliminarCuenta();
+              Alert.alert('Cuenta eliminada', 'Tu cuenta ha sido eliminada exitosamente');
+            } catch (error: any) {
+              Alert.alert('Error', error.message || 'No se pudo eliminar la cuenta');
+            }
+          }
         },
       ]
     );
@@ -365,13 +390,22 @@ export default function AjustesScreen() {
             </Card>
           </View>
 
-          <Button
-            title="Cerrar Sesión"
-            onPress={handleCerrarSesion}
-            variant="outline"
-            size="large"
-            style={{ marginTop: 8 }}
-          />
+          <View style={{ paddingHorizontal: 16, gap: 12 }}>
+            <Button
+              title="Cerrar Sesión"
+              onPress={handleCerrarSesion}
+              variant="outline"
+              size="large"
+            />
+            <Button
+              title="Eliminar Cuenta"
+              onPress={handleEliminarCuenta}
+              variant="outline"
+              size="large"
+              style={{ borderColor: '#FF3B30', marginBottom: 8 }}
+              textStyle={{ color: '#FF3B30', fontWeight: '700' as const }}
+            />
+          </View>
 
           <Text style={styles.version}>
             © 2025 MyPlanU. Todos los derechos reservados.
