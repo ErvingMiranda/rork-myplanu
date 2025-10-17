@@ -1,11 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
-import { AmistadRepository } from '@/data/repositories/amistadRepository';
-import { UsuarioRepository } from '@/data/repositories/usuarioRepository';
+import { trpc, trpcClient } from '@/lib/trpc';
 import type { Amistad, Usuario } from '@/types';
-
-const amistadRepo = new AmistadRepository();
-const usuarioRepo = new UsuarioRepository();
 
 export interface AmigoConInfo extends Amistad {
   usuario: Usuario;
@@ -13,132 +8,100 @@ export interface AmigoConInfo extends Amistad {
 
 export function useAmigos() {
   const { usuario: usuarioActual } = useAuth();
-  const [amigos, setAmigos] = useState<AmigoConInfo[]>([]);
-  const [solicitudesPendientes, setSolicitudesPendientes] = useState<AmigoConInfo[]>([]);
-  const [solicitudesEnviadas, setSolicitudesEnviadas] = useState<AmigoConInfo[]>([]);
-  const [cargando, setCargando] = useState(false);
 
-  const cargarAmigos = async () => {
-    if (!usuarioActual) return;
+  const amigosQuery = trpc.amistades.misAmigos.useQuery(
+    { usuarioId: usuarioActual?.id || '' },
+    { enabled: !!usuarioActual }
+  );
 
-    setCargando(true);
-    try {
-      const amistades = await amistadRepo.obtenerAmigos(usuarioActual.id);
-      
-      const amigosConInfo: AmigoConInfo[] = await Promise.all(
-        amistades.map(async (amistad) => {
-          const amigoId = amistad.usuarioId === usuarioActual.id ? amistad.amigoId : amistad.usuarioId;
-          const usuario = await usuarioRepo.obtenerPorId(amigoId);
-          return {
-            ...amistad,
-            usuario: usuario!,
-          };
-        })
-      );
+  const solicitudesPendientesQuery = trpc.amistades.solicitudesPendientes.useQuery(
+    { usuarioId: usuarioActual?.id || '' },
+    { enabled: !!usuarioActual }
+  );
 
-      setAmigos(amigosConInfo.filter(a => a.usuario));
-    } catch (error) {
-      console.error('Error cargando amigos:', error);
-    } finally {
-      setCargando(false);
-    }
-  };
+  const solicitudesEnviadasQuery = trpc.amistades.solicitudesEnviadas.useQuery(
+    { usuarioId: usuarioActual?.id || '' },
+    { enabled: !!usuarioActual }
+  );
 
-  const cargarSolicitudes = async () => {
-    if (!usuarioActual) return;
+  const enviarSolicitudMutation = trpc.amistades.enviarSolicitud.useMutation({
+    onSuccess: () => {
+      solicitudesEnviadasQuery.refetch();
+      console.log('📤 Solicitud de amistad enviada');
+    },
+  });
 
-    try {
-      const pendientes = await amistadRepo.obtenerSolicitudesPendientes(usuarioActual.id);
-      const enviadas = await amistadRepo.obtenerSolicitudesEnviadas(usuarioActual.id);
+  const aceptarSolicitudMutation = trpc.amistades.aceptarSolicitud.useMutation({
+    onSuccess: () => {
+      amigosQuery.refetch();
+      solicitudesPendientesQuery.refetch();
+      console.log('✅ Solicitud aceptada');
+    },
+  });
 
-      const pendientesConInfo: AmigoConInfo[] = await Promise.all(
-        pendientes.map(async (solicitud) => {
-          const usuario = await usuarioRepo.obtenerPorId(solicitud.usuarioId);
-          return {
-            ...solicitud,
-            usuario: usuario!,
-          };
-        })
-      );
+  const rechazarSolicitudMutation = trpc.amistades.rechazarSolicitud.useMutation({
+    onSuccess: () => {
+      solicitudesPendientesQuery.refetch();
+      console.log('❌ Solicitud rechazada');
+    },
+  });
 
-      const enviadasConInfo: AmigoConInfo[] = await Promise.all(
-        enviadas.map(async (solicitud) => {
-          const usuario = await usuarioRepo.obtenerPorId(solicitud.amigoId);
-          return {
-            ...solicitud,
-            usuario: usuario!,
-          };
-        })
-      );
-
-      setSolicitudesPendientes(pendientesConInfo.filter(s => s.usuario));
-      setSolicitudesEnviadas(enviadasConInfo.filter(s => s.usuario));
-    } catch (error) {
-      console.error('Error cargando solicitudes:', error);
-    }
-  };
+  const eliminarAmigoMutation = trpc.amistades.eliminarAmigo.useMutation({
+    onSuccess: () => {
+      amigosQuery.refetch();
+      console.log('🗑️ Amigo eliminado');
+    },
+  });
 
   const enviarSolicitud = async (amigoId: string): Promise<void> => {
     if (!usuarioActual) throw new Error('No hay usuario autenticado');
-    
-    await amistadRepo.crear(usuarioActual.id, amigoId);
-    await cargarSolicitudes();
-    console.log('📤 Solicitud de amistad enviada');
+    await enviarSolicitudMutation.mutateAsync({
+      usuarioId: usuarioActual.id,
+      amigoId,
+    });
   };
 
   const aceptarSolicitud = async (amistadId: string): Promise<void> => {
-    await amistadRepo.aceptarSolicitud(amistadId);
-    await cargarAmigos();
-    await cargarSolicitudes();
-    console.log('✅ Solicitud aceptada');
+    await aceptarSolicitudMutation.mutateAsync({ amistadId });
   };
 
   const rechazarSolicitud = async (amistadId: string): Promise<void> => {
-    await amistadRepo.rechazarSolicitud(amistadId);
-    await cargarSolicitudes();
-    console.log('❌ Solicitud rechazada');
+    await rechazarSolicitudMutation.mutateAsync({ amistadId });
   };
 
   const eliminarAmigo = async (amigoId: string): Promise<void> => {
     if (!usuarioActual) throw new Error('No hay usuario autenticado');
-    
-    await amistadRepo.eliminarAmistad(usuarioActual.id, amigoId);
-    await cargarAmigos();
-    console.log('🗑️ Amigo eliminado');
+    await eliminarAmigoMutation.mutateAsync({
+      usuarioId: usuarioActual.id,
+      amigoId,
+    });
   };
 
   const buscarUsuarios = async (busqueda: string): Promise<Usuario[]> => {
     if (!usuarioActual) return [];
     
-    const usuarios = await usuarioRepo.buscar({
-      email: busqueda,
-      nombre: busqueda,
-      excluirId: usuarioActual.id,
+    const response = await trpcClient.usuarios.buscar.query({
+      query: busqueda,
+      excludeId: usuarioActual.id,
     });
     
-    return usuarios;
+    return response;
   };
 
-  useEffect(() => {
-    if (usuarioActual) {
-      cargarAmigos();
-      cargarSolicitudes();
-    }
-  }, [usuarioActual]);
-
   return {
-    amigos,
-    solicitudesPendientes,
-    solicitudesEnviadas,
-    cargando,
+    amigos: amigosQuery.data || [],
+    solicitudesPendientes: solicitudesPendientesQuery.data || [],
+    solicitudesEnviadas: solicitudesEnviadasQuery.data || [],
+    cargando: amigosQuery.isLoading || solicitudesPendientesQuery.isLoading || solicitudesEnviadasQuery.isLoading,
     enviarSolicitud,
     aceptarSolicitud,
     rechazarSolicitud,
     eliminarAmigo,
     buscarUsuarios,
     recargar: () => {
-      cargarAmigos();
-      cargarSolicitudes();
+      amigosQuery.refetch();
+      solicitudesPendientesQuery.refetch();
+      solicitudesEnviadasQuery.refetch();
     },
   };
 }
