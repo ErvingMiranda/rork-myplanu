@@ -2,16 +2,15 @@ import '../polyfills';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider } from '@/hooks/useAuth';
 import { TemaProvider } from '@/hooks/useTema';
 import { EventosProvider } from '@/hooks/useEventos';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { trpc, trpcClient } from '@/lib/trpc';
 
 SplashScreen.preventAutoHideAsync();
-
-const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
@@ -28,23 +27,27 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  const [queryClient] = useState(() => new QueryClient());
+  
   useEffect(() => {
     SplashScreen.hideAsync();
   }, []);
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <TemaProvider>
-            <AuthProvider>
-              <EventosProvider>
-                <RootLayoutNav />
-              </EventosProvider>
-            </AuthProvider>
-          </TemaProvider>
-        </GestureHandlerRootView>
-      </QueryClientProvider>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <TemaProvider>
+              <AuthProvider>
+                <EventosProvider>
+                  <RootLayoutNav />
+                </EventosProvider>
+              </AuthProvider>
+            </TemaProvider>
+          </GestureHandlerRootView>
+        </QueryClientProvider>
+      </trpc.Provider>
     </ErrorBoundary>
   );
 }
