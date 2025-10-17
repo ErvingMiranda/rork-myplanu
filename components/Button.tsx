@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { 
   TouchableOpacity, 
   Text, 
@@ -22,7 +22,7 @@ interface ButtonProps {
   testID?: string;
 }
 
-export function Button({
+export const Button = memo(function Button({
   onPress,
   title,
   variant = 'primary' as const,
@@ -158,4 +158,4 @@ export function Button({
       {renderContent()}
     </TouchableOpacity>
   );
-}
+});

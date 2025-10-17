@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
 import { useTema } from '@/hooks/useTema';
 import { BORDES, SOMBRAS } from '@/constants/theme';
@@ -10,7 +10,7 @@ interface CardProps {
   testID?: string;
 }
 
-export function Card({ children, style, onPress, testID }: CardProps) {
+export const Card = memo(function Card({ children, style, onPress, testID }: CardProps) {
   const { colores } = useTema();
 
   const styles = StyleSheet.create({
@@ -42,4 +42,4 @@ export function Card({ children, style, onPress, testID }: CardProps) {
       {children}
     </View>
   );
-}
+});

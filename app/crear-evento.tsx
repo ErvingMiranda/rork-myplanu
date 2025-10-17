@@ -18,6 +18,7 @@ import { useEventos } from '@/hooks/useEventos';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { COLORES_EVENTO, DIAS_SEMANA } from '@/constants/theme';
+import { sanitizeEventInput, validateEventInput } from '@/utils/validation';
 import type { EventoCrear, Recordatorio, ChecklistItem } from '@/types';
 
 const RECORDATORIOS_PREDEF = [
@@ -168,55 +169,45 @@ export default function CrearEventoScreen() {
   };
 
   const handleGuardar = async () => {
-    if (!titulo.trim()) {
-      Alert.alert('Error', 'El título es requerido');
-      return;
-    }
-
-    const [horaI, minI] = horaInicio.split(':').map(Number);
-    const [horaF, minF] = horaFin.split(':').map(Number);
-
-    const fechaInicioFinal = new Date(fechaInicio);
-    fechaInicioFinal.setHours(horaI, minI, 0, 0);
-
-    const fechaFinFinal = new Date(fechaFin);
-    fechaFinFinal.setHours(horaF, minF, 0, 0);
-
-    if (fechaFinFinal <= fechaInicioFinal) {
-      Alert.alert('Error', 'La fecha/hora de fin debe ser posterior a la de inicio');
-      return;
-    }
-
-    if (esRecurrente && !fechaFinRecurrencia) {
-      Alert.alert('Error', 'Debes especificar hasta cuándo se repetirá el evento');
-      return;
-    }
-
-    const nuevoEvento: EventoCrear = {
-      titulo: titulo.trim(),
-      curso: curso.trim() || undefined,
-      aula: aula.trim() || undefined,
-      docente: docente.trim() || undefined,
-      fechaInicio: fechaInicioFinal.toISOString(),
-      fechaFin: fechaFinFinal.toISOString(),
-      color: colorSeleccionado.valor,
-      esRecurrente,
-      diasSemana: esRecurrente && diasSeleccionados.length > 0 ? diasSeleccionados : undefined,
-      fechaFinRecurrencia: fechaFinRecurrencia?.toISOString(),
-      recordatorios,
-      checklist: checklist.length > 0 ? checklist : undefined,
-      etiquetas: etiquetas.length > 0 ? etiquetas : undefined,
-      esCompartido: false,
-      esPublico,
-    };
-
     setCargando(true);
     try {
-      await crear(nuevoEvento);
+      const [horaI, minI] = horaInicio.split(':').map(Number);
+      const [horaF, minF] = horaFin.split(':').map(Number);
+
+      const fechaInicioFinal = new Date(fechaInicio);
+      fechaInicioFinal.setHours(horaI, minI, 0, 0);
+
+      const fechaFinFinal = new Date(fechaFin);
+      fechaFinFinal.setHours(horaF, minF, 0, 0);
+
+      const eventoBase = {
+        titulo: titulo.trim(),
+        curso: curso.trim() || undefined,
+        aula: aula.trim() || undefined,
+        docente: docente.trim() || undefined,
+        fechaInicio: fechaInicioFinal.toISOString(),
+        fechaFin: fechaFinFinal.toISOString(),
+        color: colorSeleccionado.valor,
+        esRecurrente,
+        diasSemana: esRecurrente && diasSeleccionados.length > 0 ? diasSeleccionados : undefined,
+        fechaFinRecurrencia: fechaFinRecurrencia?.toISOString(),
+        recordatorios,
+        checklist: checklist.length > 0 ? checklist : undefined,
+        etiquetas: etiquetas.length > 0 ? etiquetas : undefined,
+        esCompartido: false,
+        esPublico,
+      };
+
+      const eventoSanitizado = sanitizeEventInput(eventoBase);
+      validateEventInput(eventoSanitizado);
+
+      await crear(eventoSanitizado as EventoCrear);
+      
       Alert.alert('Éxito', 'Evento creado correctamente', [
         { text: 'OK', onPress: () => router.back() }
       ]);
     } catch (error: any) {
+      console.error('❌ Error al crear evento:', error);
       Alert.alert('Error', error.message || 'Error al crear evento');
     } finally {
       setCargando(false);

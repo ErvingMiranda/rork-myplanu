@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { 
   View, 
   TextInput, 
@@ -17,7 +17,7 @@ interface InputProps extends TextInputProps {
   testID?: string;
 }
 
-export function Input({
+export const Input = memo(function Input({
   label,
   error,
   containerStyle,
@@ -73,4 +73,4 @@ export function Input({
       {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
-}
+});
