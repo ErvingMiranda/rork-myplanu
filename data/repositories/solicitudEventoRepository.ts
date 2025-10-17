@@ -78,8 +78,4 @@ export class SolicitudEventoRepository {
     const filtradas = solicitudes.filter((s: SolicitudEvento) => s.id !== solicitudId);
     await guardarSolicitudesEvento(filtradas);
   }
-
-  async obtenerTodas(): Promise<SolicitudEvento[]> {
-    return await obtenerSolicitudesEvento();
-  }
 }

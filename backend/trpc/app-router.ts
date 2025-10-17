@@ -4,8 +4,6 @@ import { buscarUsuariosProcedure } from "./routes/usuarios/buscar/route";
 import { loginProcedure } from "./routes/usuarios/login/route";
 import { registrarProcedure } from "./routes/usuarios/registrar/route";
 import { obtenerPorIdProcedure } from "./routes/usuarios/obtener-por-id/route";
-import { eliminarUsuarioProcedure } from "./routes/usuarios/eliminar/route";
-import { actualizarUsuarioProcedure } from "./routes/usuarios/actualizar/route";
 import { enviarSolicitudProcedure } from "./routes/amistades/enviar-solicitud/route";
 import { misAmigosProcedure } from "./routes/amistades/mis-amigos/route";
 import { solicitudesPendientesProcedure } from "./routes/amistades/solicitudes-pendientes/route";
@@ -23,8 +21,6 @@ export const appRouter = createTRPCRouter({
     login: loginProcedure,
     registrar: registrarProcedure,
     obtenerPorId: obtenerPorIdProcedure,
-    eliminar: eliminarUsuarioProcedure,
-    actualizar: actualizarUsuarioProcedure,
   }),
   amistades: createTRPCRouter({
     enviarSolicitud: enviarSolicitudProcedure,
