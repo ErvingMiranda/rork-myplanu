@@ -73,6 +73,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, [usuario, router]);
 
+  const actualizarUsuario = useCallback((usuarioActualizado: Usuario) => {
+    setUsuario(usuarioActualizado);
+  }, []);
+
   return useMemo(() => ({
     usuario,
     cargando,
@@ -82,5 +86,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     iniciarSesion,
     cerrarSesion,
     eliminarCuenta,
-  }), [usuario, cargando, inicializado, registrar, iniciarSesion, cerrarSesion, eliminarCuenta]);
+    actualizarUsuario,
+  }), [usuario, cargando, inicializado, registrar, iniciarSesion, cerrarSesion, eliminarCuenta, actualizarUsuario]);
 });

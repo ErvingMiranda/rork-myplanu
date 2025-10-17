@@ -10,13 +10,12 @@ import { BORDES, SOMBRAS } from '@/constants/theme';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { UsuarioRepository } from '@/data/repositories/usuarioRepository';
-
-const userRepo = new UsuarioRepository();
+import { trpc } from '@/lib/trpc';
 
 export default function EditarPerfilScreen() {
   const { colores } = useTema();
-  const { usuario, iniciarSesion } = useAuth();
+  const { usuario, actualizarUsuario } = useAuth();
+  const actualizarUsuarioMutation = trpc.usuarios.actualizar.useMutation();
   
   const [nombre, setNombre] = useState(usuario?.nombre || '');
   const [descripcion, setDescripcion] = useState(usuario?.descripcion || '');
@@ -142,12 +141,13 @@ export default function EditarPerfilScreen() {
 
     try {
       setGuardando(true);
-      await userRepo.actualizar(usuario.id, { 
+      const usuarioActualizado = await actualizarUsuarioMutation.mutateAsync({
+        usuarioId: usuario.id,
         nombre: nombre.trim(),
         descripcion: descripcion.trim(),
-        fotoPerfil: fotoPerfil || undefined
+        fotoPerfil: fotoPerfil || undefined,
       });
-      await iniciarSesion(usuario.email, usuario.pin);
+      actualizarUsuario(usuarioActualizado);
       Alert.alert('Éxito', 'Perfil actualizado correctamente');
     } catch (error) {
       Alert.alert('Error', 'No se pudo actualizar el perfil');
@@ -177,8 +177,9 @@ export default function EditarPerfilScreen() {
 
     try {
       setGuardando(true);
-      await userRepo.actualizar(usuario.id, { pin: pinNuevo });
-      await iniciarSesion(usuario.email, pinNuevo);
+      const usuarioActualizado = await actualizarUsuarioMutation.mutateAsync({
+        usuarioId: usuario.id,
+      });
       
       setPinActual('');
       setPinNuevo('');

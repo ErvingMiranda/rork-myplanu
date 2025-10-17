@@ -14,9 +14,10 @@ import { GradientHeader, useGradientHeaderOverlap } from '@/components/GradientH
 export default function AjustesScreen() {
   const router = useRouter();
   const { colores, ajustes, actualizarAjustes, isDark } = useTema();
-  const { usuario, cerrarSesion, eliminarCuenta } = useAuth();
+  const { usuario, cerrarSesion, eliminarCuenta, actualizarUsuario } = useAuth();
   const { solicitudesPendientes } = useAmigos();
   const eliminarUsuarioMutation = trpc.usuarios.eliminar.useMutation();
+  const actualizarUsuarioMutation = trpc.usuarios.actualizar.useMutation();
   const PROFILE_OVERLAP = 12;
   const overlapStyle = useGradientHeaderOverlap(PROFILE_OVERLAP);
 
@@ -73,9 +74,11 @@ export default function AjustesScreen() {
 
   const toggleEventosPublicos = async (value: boolean) => {
     try {
-      const { UsuarioRepository } = await import('@/data/repositories/usuarioRepository');
-      const usuarioRepo = new UsuarioRepository();
-      await usuarioRepo.actualizar(usuario?.id || '', { eventosPublicos: value });
+      const usuarioActualizado = await actualizarUsuarioMutation.mutateAsync({
+        usuarioId: usuario?.id || '',
+        eventosPublicos: value,
+      });
+      actualizarUsuario(usuarioActualizado);
       Alert.alert(
         'Éxito',
         value 
@@ -235,7 +238,9 @@ export default function AjustesScreen() {
               {usuario?.fotoPerfil && usuario.fotoPerfil.trim() !== '' ? (
                 <Image 
                   source={{ uri: usuario.fotoPerfil }} 
-                  style={{ width: 80, height: 80, borderRadius: BORDES.redondo }} 
+                  style={{ width: 80, height: 80, borderRadius: BORDES.redondo }}
+                  resizeMode="cover"
+                  onError={() => console.log('Error cargando imagen de perfil')}
                 />
               ) : (
                 <User size={40} color="#FFFFFF" />
