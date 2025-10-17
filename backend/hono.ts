@@ -6,11 +6,18 @@ import { createContext } from "./trpc/create-context";
 
 const app = new Hono();
 
+console.log('🚀 Hono server starting...');
+
 app.use("*", cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.use('*', async (c, next) => {
+  console.log(`📥 ${c.req.method} ${c.req.url}`);
+  await next();
+});
 
 app.use(
   "/api/trpc/*",
@@ -36,11 +43,22 @@ app.use(
 );
 
 app.get("/", (c) => {
+  console.log('✅ Root endpoint hit');
   return c.json({ status: "ok", message: "API is running" });
 });
 
 app.get("/api", (c) => {
+  console.log('✅ /api endpoint hit');
   return c.json({ status: "ok", message: "API endpoint" });
+});
+
+app.get("/api/trpc", (c) => {
+  console.log('✅ /api/trpc endpoint hit (GET)');
+  return c.json({ 
+    status: "ok", 
+    message: "tRPC endpoint",
+    note: "Use POST with proper tRPC payload" 
+  });
 });
 
 app.notFound((c) => {
