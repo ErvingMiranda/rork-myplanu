@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { Sun, Moon, Bell, Info, User, ChevronRight, Users as UsersIcon, BellDot } from 'lucide-react-native';
+import { Sun, Moon, Bell, Info, User, ChevronRight, Users as UsersIcon, BellDot, Bug } from 'lucide-react-native';
 import { BORDES, SOMBRAS } from '@/constants/theme';
 import { useTema } from '@/hooks/useTema';
 import { useAuth } from '@/hooks/useAuth';
@@ -392,6 +392,24 @@ export default function AjustesScreen() {
                   </View>
                 </View>
               </View>
+            </Card>
+
+            <Card style={styles.opcionCard}>
+              <TouchableOpacity 
+                onPress={() => router.push('/debug-backend' as any)}
+                style={styles.opcion}
+              >
+                <View style={styles.opcionLeft}>
+                  <Bug size={24} color={colores.primary} />
+                  <View style={styles.opcionTextos}>
+                    <Text style={styles.opcionTitulo}>Debug Backend</Text>
+                    <Text style={styles.opcionDescripcion}>
+                      Diagnosticar problemas de conexión
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight size={20} color={colores.textSecondary} />
+              </TouchableOpacity>
             </Card>
           </View>
 
