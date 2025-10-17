@@ -232,7 +232,7 @@ export default function AjustesScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.perfilAvatar}>
-              {usuario?.fotoPerfil ? (
+              {usuario?.fotoPerfil && usuario.fotoPerfil.trim() !== '' ? (
                 <Image 
                   source={{ uri: usuario.fotoPerfil }} 
                   style={{ width: 80, height: 80, borderRadius: BORDES.redondo }} 
