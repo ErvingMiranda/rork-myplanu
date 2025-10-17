@@ -24,8 +24,15 @@ export class AuthService {
       await this.guardarSesion(usuario.id);
       return usuario;
     } catch (error: any) {
-      console.error('❌ Error en registro:', error.message);
-      throw error;
+      console.error('❌ Error en registro:', error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error shape:', error.shape);
+      
+      if (error.message && error.message.includes('Este email ya está registrado')) {
+        throw new Error('Este email ya está registrado');
+      }
+      
+      throw new Error(error.message || 'Error al registrar usuario');
     }
   }
 
