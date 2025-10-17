@@ -124,6 +124,7 @@ export default function LoginScreen() {
       justifyContent: 'center',
       alignItems: 'center',
       marginTop: 24,
+      gap: 4,
     },
     footerText: {
       fontSize: 14,
@@ -205,7 +206,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>¿No tienes cuenta? </Text>
+            <Text style={styles.footerText}>¿No tienes cuenta?</Text>
             <TouchableOpacity onPress={irARegistro}>
               <Text style={styles.footerLink}>Regístrate</Text>
             </TouchableOpacity>

@@ -8,7 +8,6 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { TemaProvider } from '@/hooks/useTema';
 import { EventosProvider } from '@/hooks/useEventos';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { trpc, trpcClient } from '@/lib/trpc';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,19 +34,17 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <TemaProvider>
-              <AuthProvider>
-                <EventosProvider>
-                  <RootLayoutNav />
-                </EventosProvider>
-              </AuthProvider>
-            </TemaProvider>
-          </GestureHandlerRootView>
-        </QueryClientProvider>
-      </trpc.Provider>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <TemaProvider>
+            <AuthProvider>
+              <EventosProvider>
+                <RootLayoutNav />
+              </EventosProvider>
+            </AuthProvider>
+          </TemaProvider>
+        </GestureHandlerRootView>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

@@ -123,6 +123,7 @@ export default function RegistroScreen() {
       justifyContent: 'center',
       alignItems: 'center',
       marginTop: 16,
+      gap: 4,
     },
     footerText: {
       fontSize: 14,
@@ -226,7 +227,7 @@ export default function RegistroScreen() {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>¿Ya tienes cuenta? </Text>
+            <Text style={styles.footerText}>¿Ya tienes cuenta?</Text>
             <TouchableOpacity onPress={irALogin}>
               <Text style={styles.footerLink}>Inicia sesión</Text>
             </TouchableOpacity>

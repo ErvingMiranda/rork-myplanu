@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { trpcClient } from '@/lib/trpc';
+import { UsuarioRepository } from '@/data/repositories/usuarioRepository';
 import { validateEmail, validatePin, sanitizeEmail, sanitizeString } from '@/utils/validation';
 import type { Usuario } from '@/types';
 
 const AUTH_KEY = '@myplanu_auth';
+const userRepo = new UsuarioRepository();
 
 export class AuthService {
   async registrar(email: string, pin: string, nombre?: string): Promise<Usuario> {
@@ -14,25 +15,25 @@ export class AuthService {
       validateEmail(emailLimpio);
       validatePin(pin);
       
+      const existente = await userRepo.obtenerPorEmail(emailLimpio);
+      if (existente) {
+        console.log('⚠️ El correo ya está registrado');
+        throw new Error('El correo ya está registrado');
+      }
+
       const nombreLimpio = nombre ? sanitizeString(nombre) : undefined;
-      const usuario = await trpcClient.usuarios.registrar.mutate({ 
+      const usuario = await userRepo.crear({ 
         email: emailLimpio, 
         pin, 
         nombre: nombreLimpio,
+        eventosPublicos: false,
       });
       console.log('✅ Usuario registrado exitosamente:', usuario.email);
       await this.guardarSesion(usuario.id);
       return usuario;
     } catch (error: any) {
-      console.error('❌ Error en registro:', error);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error shape:', error.shape);
-      
-      if (error.message && error.message.includes('Este email ya está registrado')) {
-        throw new Error('Este email ya está registrado');
-      }
-      
-      throw new Error(error.message || 'Error al registrar usuario');
+      console.error('❌ Error en registro:', error.message);
+      throw error;
     }
   }
 
@@ -44,17 +45,18 @@ export class AuthService {
       validateEmail(emailLimpio);
       validatePin(pin);
       
-      const usuario = await trpcClient.usuarios.login.mutate({
-        email: emailLimpio,
-        pin,
-      });
+      const usuario = await userRepo.verificarCredenciales(emailLimpio, pin);
+      if (!usuario) {
+        console.log('❌ No se encontró usuario con esas credenciales');
+        throw new Error('Credenciales incorrectas');
+      }
 
       console.log('✅ Usuario encontrado:', usuario.email);
       await this.guardarSesion(usuario.id);
       return usuario;
     } catch (error: any) {
       console.error('❌ Error en inicio de sesión:', error.message);
-      throw new Error('Credenciales incorrectas');
+      throw error;
     }
   }
 
@@ -67,8 +69,7 @@ export class AuthService {
       const userId = await AsyncStorage.getItem(AUTH_KEY);
       if (!userId) return null;
 
-      const usuario = await trpcClient.usuarios.obtenerPorId.query({ id: userId });
-      return usuario;
+      return await userRepo.obtenerPorId(userId);
     } catch (error) {
       console.error('Error al obtener usuario actual:', error);
       return null;
